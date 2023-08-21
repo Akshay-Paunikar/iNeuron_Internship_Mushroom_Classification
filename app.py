@@ -3,6 +3,7 @@ import sys
 import numpy as np
 import pandas as pd
 from flask import Flask, render_template, request
+import pickle
 
 from mushroom.pipeline.prediction_pipeline import CustomData, PredictionPipeline
 
@@ -31,10 +32,13 @@ def predict_datapoint():
             spore_print_color = request.form.get("spore-print-color")
         )
         
+        preprocessor = pickle.load(open('preprocessor.pkl','rb'))
+        model = pickle.load(open('model.pkl', 'rb'))
+        
         pred_df = data.get_data_as_data_frame()
         
-        predit_pipeline = PredictionPipeline()
-        results = predit_pipeline.predict(pred_df)
+        pred_df = preprocessor.transform(pred_df)
+        results = model.predict(pred_df)
         
         if results == 0.0:
             answer = "edible"
